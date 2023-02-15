@@ -2,6 +2,7 @@ import { OpenFeatureClient } from './client';
 import { DefaultLogger, SafeLogger } from '../shared/logger';
 import { NOOP_PROVIDER } from './no-op-provider';
 import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from '../shared/no-op-transaction-context-propagator';
+import { OpenFeatureCommonAPI } from '../shared/open-feature';
 import {
   EvaluationContext,
   FlagValue,
@@ -25,15 +26,14 @@ type OpenFeatureGlobal = {
 };
 const _globalThis = globalThis as OpenFeatureGlobal;
 
-export class OpenFeatureAPI implements GlobalApi {
-  private _provider: Provider = NOOP_PROVIDER;
-  private _transactionContextPropagator: TransactionContextPropagator = NOOP_TRANSACTION_CONTEXT_PROPAGATOR;
-  private _context: EvaluationContext = {};
-  private _hooks: Hook[] = [];
-  private _logger: Logger = new DefaultLogger();
+export class OpenFeatureAPI extends OpenFeatureCommonAPI implements GlobalApi {
+  protected _provider: Provider = NOOP_PROVIDER;
+  protected _hooks: Hook[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
   /**
    * Gets a singleton instance of the OpenFeature API.

@@ -2,61 +2,20 @@ import { DefaultLogger, SafeLogger } from './logger';
 import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from './no-op-transaction-context-propagator';
 import {
   EvaluationContext,
-  FlagValue,
-  GlobalApi,
   Logger,
   ProviderMetadata,
   TransactionContext,
   TransactionContextPropagator,
 } from './types';
 
-// use a symbol as a key for the global singleton
-const GLOBAL_OPENFEATURE_API_KEY = Symbol.for('@openfeature/js.api');
+export abstract class OpenFeatureCommonAPI {
+  protected _transactionContextPropagator: TransactionContextPropagator = NOOP_TRANSACTION_CONTEXT_PROPAGATOR;
+  protected _context: EvaluationContext = {};
+  protected _logger: Logger = new DefaultLogger();
 
-type OpenFeatureGlobal = {
-  [GLOBAL_OPENFEATURE_API_KEY]?: OpenFeatureAPI;
-};
-const _globalThis = globalThis as OpenFeatureGlobal;
-
-export class OpenFeatureAPI implements GlobalApi {
-  private _provider: Provider = NOOP_PROVIDER;
-  private _transactionContextPropagator: TransactionContextPropagator = NOOP_TRANSACTION_CONTEXT_PROPAGATOR;
-  private _context: EvaluationContext = {};
-  private _hooks: Hook[] = [];
-  private _logger: Logger = new DefaultLogger();
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private constructor() {}
-
-  /**
-   * Gets a singleton instance of the OpenFeature API.
-   *
-   * @ignore
-   * @returns {OpenFeatureAPI} OpenFeature API
-   */
-  static getInstance(): OpenFeatureAPI {
-    const globalApi = _globalThis[GLOBAL_OPENFEATURE_API_KEY];
-    if (globalApi) {
-      return globalApi;
-    }
-
-    const instance = new OpenFeatureAPI();
-    _globalThis[GLOBAL_OPENFEATURE_API_KEY] = instance;
-    return instance;
-  }
-
-  setLogger(logger: Logger): OpenFeatureAPI {
+  setLogger(logger: Logger): OpenFeatureCommonAPI {
     this._logger = new SafeLogger(logger);
     return this;
-  }
-
-  getClient(name?: string, version?: string, context?: EvaluationContext): Client {
-    return new OpenFeatureClient(
-      () => this._provider,
-      () => this._logger,
-      { name, version },
-      context
-    );
   }
 
   /**
@@ -64,30 +23,9 @@ export class OpenFeatureAPI implements GlobalApi {
    *
    * @returns {ProviderMetadata} Provider Metadata
    */
-  get providerMetadata(): ProviderMetadata {
-    return this._provider.metadata;
-  }
+  abstract get providerMetadata(): ProviderMetadata;
 
-  addHooks(...hooks: Hook<FlagValue>[]): OpenFeatureAPI {
-    this._hooks = [...this._hooks, ...hooks];
-    return this;
-  }
-
-  getHooks(): Hook<FlagValue>[] {
-    return this._hooks;
-  }
-
-  clearHooks(): OpenFeatureAPI {
-    this._hooks = [];
-    return this;
-  }
-
-  setProvider(provider: Provider): OpenFeatureAPI {
-    this._provider = provider;
-    return this;
-  }
-
-  setContext(context: EvaluationContext): OpenFeatureAPI {
+  setContext(context: EvaluationContext): OpenFeatureCommonAPI {
     this._context = context;
     return this;
   }
@@ -96,7 +34,7 @@ export class OpenFeatureAPI implements GlobalApi {
     return this._context;
   }
 
-  setTransactionContextPropagator(transactionContextPropagator: TransactionContextPropagator): OpenFeatureAPI {
+  setTransactionContextPropagator(transactionContextPropagator: TransactionContextPropagator): OpenFeatureCommonAPI {
     const baseMessage = 'Invalid TransactionContextPropagator, will not be set: ';
     if (typeof transactionContextPropagator?.getTransactionContext !== 'function') {
       this._logger.error(`${baseMessage}: getTransactionContext is not a function.`);
@@ -127,10 +65,3 @@ export class OpenFeatureAPI implements GlobalApi {
     }
   }
 }
-
-/**
- * A singleton instance of the OpenFeature API.
- *
- * @returns {OpenFeatureAPI} OpenFeature API
- */
-export const OpenFeature = OpenFeatureAPI.getInstance();
