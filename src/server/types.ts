@@ -18,6 +18,138 @@ import {
   ResolutionDetails
 } from '../shared/types';
 
+/**
+ * Interface that providers must implement to resolve flag values for their particular
+ * backend or vendor.
+ *
+ * Implementation for resolving all the required flag types must be defined.
+ */
+export interface Provider extends CommonProvider {
+
+  /**
+   * A provider hook exposes a mechanism for provider authors to register hooks
+   * to tap into various stages of the flag evaluation lifecycle. These hooks can
+   * be used to perform side effects and mutate the context for purposes of the
+   * provider. Provider hooks are not configured or controlled by the application author.
+   */
+  readonly hooks?: Hook[];
+
+  /**
+   * Resolve a boolean flag and its evaluation details.
+   */
+  resolveBooleanEvaluation(
+    flagKey: string,
+    defaultValue: boolean,
+    context: EvaluationContext,
+    logger: Logger
+  ): Promise<ResolutionDetails<boolean>>;
+
+  /**
+   * Resolve a string flag and its evaluation details.
+   */
+  resolveStringEvaluation(
+    flagKey: string,
+    defaultValue: string,
+    context: EvaluationContext,
+    logger: Logger
+  ): Promise<ResolutionDetails<string>>;
+
+  /**
+   * Resolve a numeric flag and its evaluation details.
+   */
+  resolveNumberEvaluation(
+    flagKey: string,
+    defaultValue: number,
+    context: EvaluationContext,
+    logger: Logger
+  ): Promise<ResolutionDetails<number>>;
+
+  /**
+   * Resolve and parse an object flag and its evaluation details.
+   */
+  resolveObjectEvaluation<T extends JsonValue>(
+    flagKey: string,
+    defaultValue: T,
+    context: EvaluationContext,
+    logger: Logger
+  ): Promise<ResolutionDetails<T>>;
+}
+
+export interface Hook<T extends FlagValue = FlagValue> {
+  /**
+   * Runs before flag values are resolved from the provider.
+   * If an EvaluationContext is returned, it will be merged with the pre-existing EvaluationContext.
+   *
+   * @param hookContext
+   * @param hookHints
+   */
+  before?(
+    hookContext: BeforeHookContext,
+    hookHints?: HookHints
+  ): Promise<EvaluationContext | void> | EvaluationContext | void;
+
+  /**
+   * Runs after flag values are successfully resolved from the provider.
+   *
+   * @param hookContext
+   * @param evaluationDetails
+   * @param hookHints
+   */
+  after?(
+    hookContext: Readonly<HookContext<T>>,
+    evaluationDetails: EvaluationDetails<T>,
+    hookHints?: HookHints
+  ): Promise<void> | void;
+
+  /**
+   * Runs in the event of an unhandled error or promise rejection during flag resolution, or any attached hooks.
+   *
+   * @param hookContext
+   * @param error
+   * @param hookHints
+   */
+  error?(hookContext: Readonly<HookContext<T>>, error: unknown, hookHints?: HookHints): Promise<void> | void;
+
+  /**
+   * Runs after all other hook stages, regardless of success or error.
+   * Errors thrown here are unhandled by the client and will surface in application code.
+   *
+   * @param hookContext
+   * @param hookHints
+   */
+  finally?(hookContext: Readonly<HookContext<T>>, hookHints?: HookHints): Promise<void> | void;
+}
+
+interface EvaluationLifeCycle<T> {
+  /**
+   * Adds hooks that will run during flag evaluations on this receiver.
+   * Hooks are executed in the order they were registered. Adding additional hooks
+   * will not remove existing hooks.
+   * Hooks registered on the global API object run with all evaluations.
+   * Hooks registered on the client run with all evaluations on that client.
+   *
+   * @template T The type of the receiver
+   * @param {Hook<FlagValue>[]} hooks A list of hooks that should always run
+   * @returns {T} The receiver (this object)
+   */
+  addHooks(...hooks: Hook[]): T;
+
+  /**
+   * Access all the hooks that are registered on this receiver.
+   *
+   * @returns {Hook<FlagValue>[]} A list of the client hooks
+   */
+  getHooks(): Hook[];
+
+  /**
+   * Clears all the hooks that are registered on this receiver.
+   *
+   * @template T The type of the receiver
+   * @returns {T} The receiver (this object)
+   */
+  clearHooks(): T;
+}
+
 export interface FlagEvaluationOptions {
   hooks?: Hook[];
   hookHints?: HookHints;
@@ -195,62 +327,6 @@ export interface Features {
   ): Promise<EvaluationDetails<T>>;
 }
 
-/**
- * Interface that providers must implement to resolve flag values for their particular
- * backend or vendor.
- *
- * Implementation for resolving all the required flag types must be defined.
- */
-export interface Provider extends CommonProvider {
-  /**
-   * A provider hook exposes a mechanism for provider authors to register hooks
-   * to tap into various stages of the flag evaluation lifecycle. These hooks can
-   * be used to perform side effects and mutate the context for purposes of the
-   * provider. Provider hooks are not configured or controlled by the application author.
-   */
-  readonly hooks?: Hook[];
-
-  /**
-   * Resolve a boolean flag and its evaluation details.
-   */
-  resolveBooleanEvaluation(
-    flagKey: string,
-    defaultValue: boolean,
-    context: EvaluationContext,
-    logger: Logger
-  ): Promise<ResolutionDetails<boolean>>;
-
-  /**
-   * Resolve a string flag and its evaluation details.
-   */
-  resolveStringEvaluation(
-    flagKey: string,
-    defaultValue: string,
-    context: EvaluationContext,
-    logger: Logger
-  ): Promise<ResolutionDetails<string>>;
-
-  /**
-   * Resolve a numeric flag and its evaluation details.
-   */
-  resolveNumberEvaluation(
-    flagKey: string,
-    defaultValue: number,
-    context: EvaluationContext,
-    logger: Logger
-  ): Promise<ResolutionDetails<number>>;
-
-  /**
-   * Resolve and parse an object flag and its evaluation details.
-   */
-  resolveObjectEvaluation<T extends JsonValue>(
-    flagKey: string,
-    defaultValue: T,
-    context: EvaluationContext,
-    logger: Logger
-  ): Promise<ResolutionDetails<T>>;
-}
-
 export interface Client
   extends EvaluationLifeCycle<Client>,
     Features,
@@ -286,81 +362,6 @@ export interface GlobalApi
    * @returns {GlobalApi} OpenFeature API
    */
   setProvider(provider: Provider): GlobalApi;
-}
-
-interface EvaluationLifeCycle<T> {
-  /**
-   * Adds hooks that will run during flag evaluations on this receiver.
-   * Hooks are executed in the order they were registered. Adding additional hooks
-   * will not remove existing hooks.
-   * Hooks registered on the global API object run with all evaluations.
-   * Hooks registered on the client run with all evaluations on that client.
-   *
-   * @template T The type of the receiver
-   * @param {Hook<FlagValue>[]} hooks A list of hooks that should always run
-   * @returns {T} The receiver (this object)
-   */
-  addHooks(...hooks: Hook[]): T;
-
-  /**
-   * Access all the hooks that are registered on this receiver.
-   *
-   * @returns {Hook<FlagValue>[]} A list of the client hooks
-   */
-  getHooks(): Hook[];
-
-  /**
-   * Clears all the hooks that are registered on this receiver.
-   *
-   * @template T The type of the receiver
-   * @returns {T} The receiver (this object)
-   */
-  clearHooks(): T;
-}
-
-export interface Hook<T extends FlagValue = FlagValue> {
-  /**
-   * Runs before flag values are resolved from the provider.
-   * If an EvaluationContext is returned, it will be merged with the pre-existing EvaluationContext.
-   *
-   * @param hookContext
-   * @param hookHints
-   */
-  before?(
-    hookContext: BeforeHookContext,
-    hookHints?: HookHints
-  ): Promise<EvaluationContext | void> | EvaluationContext | void;
-
-  /**
-   * Runs after flag values are successfully resolved from the provider.
-   *
-   * @param hookContext
-   * @param evaluationDetails
-   * @param hookHints
-   */
-  after?(
-    hookContext: Readonly<HookContext<T>>,
-    evaluationDetails: EvaluationDetails<T>,
-    hookHints?: HookHints
-  ): Promise<void> | void;
-
-  /**
-   * Runs in the event of an unhandled error or promise rejection during flag resolution, or any attached hooks.
-   *
-   * @param hookContext
-   * @param error
-   * @param hookHints
-   */
-  error?(hookContext: Readonly<HookContext<T>>, error: unknown, hookHints?: HookHints): Promise<void> | void;
-
-  /**
-   * Runs after all other hook stages, regardless of success or error.
-   * Errors thrown here are unhandled by the client and will surface in application code.
-   *
-   * @param hookContext
-   * @param hookHints
-   */
-  finally?(hookContext: Readonly<HookContext<T>>, hookHints?: HookHints): Promise<void> | void;
 }
 
 export interface EventProvider {
