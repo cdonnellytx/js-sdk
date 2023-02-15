@@ -1,36 +1,45 @@
 import { OpenFeatureError } from '../shared/errors';
 import { SafeLogger } from '../shared/logger';
 import {
+  ApiEvents,
   ClientMetadata,
   ErrorCode,
   EvaluationContext,
   EvaluationDetails,
   FlagValue,
   FlagValueType,
+  Handler,
   HookContext,
   JsonValue,
   Logger,
+  ProviderEvents,
   ResolutionDetails,
   StandardResolutionReasons
 } from '../shared/types';
-import { OpenFeature } from './open-feature';
-import { Client, FlagEvaluationOptions, Hook, Provider } from './types';
+import { OpenFeature, OpenFeatureAPI } from './open-feature';
+import { Client, EventProvider, FlagEvaluationOptions, Hook, Provider } from './types';
 
 type OpenFeatureClientOptions = {
   name?: string;
   version?: string;
 };
 
+type HandlerWrapper = {
+  eventType: string;
+  handler: Handler;
+}
+
 export class OpenFeatureClient implements Client {
   readonly metadata: ClientMetadata;
   private _context: EvaluationContext;
   private _hooks: Hook[] = [];
   private _clientLogger?: Logger;
+  private _handlerWrappers: HandlerWrapper[] = [];
 
   constructor(
     // we always want the client to use the current provider,
     // so pass a function to always access the currently registered one.
-    private readonly providerAccessor: () => Provider,
+    private readonly providerAccessor: () => Provider & Partial<EventProvider>,
     private readonly globalLogger: () => Logger,
     options: OpenFeatureClientOptions,
     context: EvaluationContext = {}
@@ -40,6 +49,17 @@ export class OpenFeatureClient implements Client {
       version: options.version,
     } as const;
     this._context = context;
+
+    this.attachListeners();
+    OpenFeatureAPI.getInstance().events.on(ApiEvents.ProviderChanged, () => this.attachListeners());
+  }
+
+  addHandler(eventType: ProviderEvents, handler: Handler): void {
+    this._handlerWrappers.push({ eventType, handler });
+    if (eventType === ProviderEvents.Ready && this.providerAccessor().ready) {
+      // run immediately, we're ready.
+      handler();
+    }
   }
 
   setLogger(logger: Logger): OpenFeatureClient {
@@ -298,11 +318,22 @@ export class OpenFeatureClient implements Client {
     }
   }
 
-  private get _provider() {
+  private get _provider(): Provider & Partial<EventProvider> {
     return this.providerAccessor();
   }
 
   private get _logger() {
     return this._clientLogger || this.globalLogger();
+  }
+
+  private attachListeners() {
+    // iterate over the event types
+    Object.values(ProviderEvents)
+      .forEach(e => this.providerAccessor().events?.on(e, () => {
+        // on each event type, fire the associated handlers
+        this._handlerWrappers
+          .filter(wrapper => wrapper.eventType === e)
+          .forEach(wrapper => wrapper.handler());
+      }));
   }
 }

@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import { SafeLogger } from '../shared/logger';
 import { OpenFeatureCommonAPI } from '../shared/open-feature';
 import {
@@ -26,6 +27,7 @@ type OpenFeatureGlobal = {
 const _globalThis = globalThis as OpenFeatureGlobal;
 
 export class OpenFeatureAPI extends OpenFeatureCommonAPI implements GlobalApi {
+  events: EventEmitter = new EventEmitter();
   protected _provider: Provider = NOOP_PROVIDER;
   protected _hooks: Hook[] = [];
 

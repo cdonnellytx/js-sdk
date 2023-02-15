@@ -1,9 +1,11 @@
+import EventEmitter from 'events';
 import {
   BeforeHookContext,
   ClientMetadata,
   CommonProvider,
   EvaluationContext,
   EvaluationDetails,
+  Eventing,
   FlagValue,
   HookContext,
   HookHints,
@@ -249,7 +251,12 @@ export interface Provider extends CommonProvider {
   ): Promise<ResolutionDetails<T>>;
 }
 
-export interface Client extends EvaluationLifeCycle<Client>, Features, ManageContext<Client>, ManageLogger<Client> {
+export interface Client
+  extends EvaluationLifeCycle<Client>,
+    Features,
+    ManageContext<Client>,
+    ManageLogger<Client>,
+    Eventing {
   readonly metadata: ClientMetadata;
 }
 
@@ -356,3 +363,7 @@ export interface Hook<T extends FlagValue = FlagValue> {
   finally?(hookContext: Readonly<HookContext<T>>, hookHints?: HookHints): Promise<void> | void;
 }
 
+export interface EventProvider {
+  readonly events: EventEmitter;
+  readonly ready: boolean;
+}

@@ -1,5 +1,29 @@
 export type PrimitiveValue = null | boolean | string | number;
 
+export enum ProviderEvents {
+  Ready = 'PROVIDER_READY',
+  Error = 'PROVIDER_ERROR',
+  ConfigurationChanged = 'PROVIDER_CONFIGURATION_CHANGED',
+  Shutdown = 'PROVIDER_SHUTDOWN',
+};
+
+export enum ApiEvents {
+  ProviderChanged = 'providerChanged',
+}
+
+export interface Eventing {
+  addHandler(notificationType: string, handler: Handler): void
+}
+
+export type EventContext = {
+  notificationType: string;
+  [key: string]: unknown;
+}
+
+export type Handler = (eventContext?: EventContext) => void
+
+export type EventCallbackMessage = (eventContext: EventContext) => void
+
 export type JsonObject = { [key: string]: JsonValue };
 
 export type JsonArray = JsonValue[];
