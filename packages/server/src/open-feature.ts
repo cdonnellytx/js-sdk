@@ -4,6 +4,7 @@ import {
   OpenFeatureCommonAPI,
   ProviderMetadata
 } from '@openfeature/shared';
+import EventEmitter from 'events';
 import { OpenFeatureClient } from './client';
 import { NOOP_PROVIDER } from './no-op-provider';
 import { Client, GlobalApi, Hook, Provider } from './types';
@@ -17,6 +18,7 @@ type OpenFeatureGlobal = {
 const _globalThis = globalThis as OpenFeatureGlobal;
 
 export class OpenFeatureAPI extends OpenFeatureCommonAPI implements GlobalApi {
+  events: EventEmitter = new EventEmitter();
   protected _hooks: Hook[] = [];
   protected _provider: Provider = NOOP_PROVIDER;
 

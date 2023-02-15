@@ -4,6 +4,7 @@ import {
   CommonProvider,
   EvaluationContext,
   EvaluationDetails,
+  Eventing,
   FlagValue,
   HookContext,
   HookHints,
@@ -15,6 +16,7 @@ import {
   ProviderMetadata,
   ResolutionDetails
 } from '@openfeature/shared';
+import EventEmitter from 'events';
 
 /**
  * Interface that providers must implement to resolve flag values for their particular
@@ -116,6 +118,11 @@ export interface Hook<T extends FlagValue = FlagValue> {
    * @param hookHints
    */
   finally?(hookContext: Readonly<HookContext<T>>, hookHints?: HookHints): Promise<void> | void;
+}
+
+export interface EventProvider {
+  readonly events: EventEmitter;
+  readonly ready: boolean;
 }
 
 interface EvaluationLifeCycle<T> {
@@ -329,7 +336,8 @@ export interface Client
   extends EvaluationLifeCycle<Client>,
     Features,
     ManageContext<Client>,
-    ManageLogger<Client> {
+    ManageLogger<Client>,
+    Eventing {
   readonly metadata: ClientMetadata;
 }
 
