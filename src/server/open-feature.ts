@@ -1,7 +1,4 @@
-import { OpenFeatureClient } from './client';
-import { DefaultLogger, SafeLogger } from '../shared/logger';
-import { NOOP_PROVIDER } from './no-op-provider';
-import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from '../shared/no-op-transaction-context-propagator';
+import { SafeLogger } from '../shared/logger';
 import { OpenFeatureCommonAPI } from '../shared/open-feature';
 import {
   EvaluationContext,
@@ -11,6 +8,8 @@ import {
   TransactionContext,
   TransactionContextPropagator
 } from '../shared/types';
+import { OpenFeatureClient } from './client';
+import { NOOP_PROVIDER } from './no-op-provider';
 import {
   Client,
   GlobalApi,
