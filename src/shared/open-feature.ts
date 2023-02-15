@@ -7,6 +7,8 @@ export abstract class OpenFeatureCommonAPI {
   protected _context: EvaluationContext = {};
   protected _logger: Logger = new DefaultLogger();
 
+  abstract close(): void;
+
   setLogger(logger: Logger): OpenFeatureCommonAPI {
     this._logger = new SafeLogger(logger);
     return this;
