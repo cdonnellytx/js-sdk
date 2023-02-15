@@ -1,4 +1,5 @@
-import { JsonValue, Provider, ResolutionDetails } from './types';
+import { JsonValue, ResolutionDetails } from '../shared/types';
+import { Provider } from './types';
 
 const REASON_NO_OP = 'No-op';
 

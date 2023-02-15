@@ -1,15 +1,10 @@
-import { OpenFeatureClient } from './client';
 import { DefaultLogger, SafeLogger } from './logger';
-import { NOOP_PROVIDER } from './no-op-provider';
 import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from './no-op-transaction-context-propagator';
 import {
-  Client,
   EvaluationContext,
   FlagValue,
   GlobalApi,
-  Hook,
   Logger,
-  Provider,
   ProviderMetadata,
   TransactionContext,
   TransactionContextPropagator,

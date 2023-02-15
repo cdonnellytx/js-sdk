@@ -1,22 +1,24 @@
-import { OpenFeatureError } from './errors';
-import { SafeLogger } from './logger';
+import { OpenFeatureError } from '../shared/errors';
+import { SafeLogger } from '../shared/logger';
 import { OpenFeature } from './open-feature';
 import {
-  Client,
   ClientMetadata,
   ErrorCode,
   EvaluationContext,
   EvaluationDetails,
-  FlagEvaluationOptions,
   FlagValue,
   FlagValueType,
-  Hook,
   HookContext,
   JsonValue,
   Logger,
-  Provider,
   ResolutionDetails,
-  StandardResolutionReasons,
+  StandardResolutionReasons
+} from '../shared/types';
+import {
+  Client,
+  FlagEvaluationOptions,
+  Hook,
+  Provider
 } from './types';
 
 type OpenFeatureClientOptions = {

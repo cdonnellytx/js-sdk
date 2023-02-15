@@ -1,18 +1,20 @@
 import { OpenFeatureClient } from './client';
-import { DefaultLogger, SafeLogger } from './logger';
+import { DefaultLogger, SafeLogger } from '../shared/logger';
 import { NOOP_PROVIDER } from './no-op-provider';
-import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from './no-op-transaction-context-propagator';
+import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from '../shared/no-op-transaction-context-propagator';
 import {
-  Client,
   EvaluationContext,
   FlagValue,
-  GlobalApi,
-  Hook,
   Logger,
-  Provider,
   ProviderMetadata,
   TransactionContext,
-  TransactionContextPropagator,
+  TransactionContextPropagator
+} from '../shared/types';
+import {
+  Client,
+  GlobalApi,
+  Hook,
+  Provider
 } from './types';
 
 // use a symbol as a key for the global singleton

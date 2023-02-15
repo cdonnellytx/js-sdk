@@ -1,5 +1,4 @@
-export * from './errors';
-export * from './logger';
-export * from './no-op-transaction-context-propagator';
+export * from './client';
+export * from './no-op-provider';
 export * from './open-feature';
 export * from './types';
