@@ -1,4 +1,4 @@
-import { DefaultLogger } from './logger';
+import { DefaultLogger, SafeLogger } from './logger';
 import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from './no-op-transaction-context-propagator';
 import { EvaluationContext, Logger, TransactionContext, TransactionContextPropagator } from './types';
 
@@ -9,7 +9,11 @@ export abstract class OpenFeatureCommonAPI {
 
   // TODO: move close from client to new abstract here when we want close in server.
   abstract clearHooks(): this
-  abstract setLogger(logger: Logger): this;
+
+  setLogger(logger: Logger): this {
+    this._logger = new SafeLogger(logger);
+    return this;
+  }
 
   getContext(): EvaluationContext {
     return this._context;

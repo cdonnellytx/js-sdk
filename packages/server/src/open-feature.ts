@@ -1,10 +1,8 @@
 import {
   EvaluationContext,
   FlagValue,
-  Logger,
   OpenFeatureCommonAPI,
-  ProviderMetadata,
-  SafeLogger
+  ProviderMetadata
 } from '@openfeature/shared';
 import { OpenFeatureClient } from './client';
 import { NOOP_PROVIDER } from './no-op-provider';
@@ -25,11 +23,6 @@ export class OpenFeatureAPI extends OpenFeatureCommonAPI implements GlobalApi {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {
     super();
-  }
-
-  setLogger(logger: Logger): this {
-    this._logger = new SafeLogger(logger);
-    return this;
   }
 
   /**

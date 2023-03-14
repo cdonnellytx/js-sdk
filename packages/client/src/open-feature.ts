@@ -2,10 +2,8 @@ import {
   ApiEvents,
   EvaluationContext,
   FlagValue,
-  Logger,
   OpenFeatureCommonAPI,
-  ProviderMetadata,
-  SafeLogger
+  ProviderMetadata
 } from '@openfeature/shared';
 import { OpenFeatureClient } from './client';
 import { NOOP_PROVIDER } from './no-op-provider';
@@ -54,11 +52,6 @@ export class OpenFeatureAPI extends OpenFeatureCommonAPI {
    */
   get providerMetadata(): ProviderMetadata {
     return this._provider.metadata;
-  }
-
-  setLogger(logger: Logger): this {
-    this._logger = new SafeLogger(logger);
-    return this;
   }
 
   addHooks(...hooks: Hook<FlagValue>[]): this {
