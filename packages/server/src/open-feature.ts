@@ -8,7 +8,7 @@ import {
 } from '@openfeature/shared';
 import { OpenFeatureClient } from './client';
 import { NOOP_PROVIDER } from './no-op-provider';
-import { Client, Hook, Provider } from './types';
+import { Client, GlobalApi, Hook, Provider } from './types';
 
 // use a symbol as a key for the global singleton
 const GLOBAL_OPENFEATURE_API_KEY = Symbol.for('@openfeature/js.api');
@@ -18,7 +18,7 @@ type OpenFeatureGlobal = {
 };
 const _globalThis = globalThis as OpenFeatureGlobal;
 
-export class OpenFeatureAPI extends OpenFeatureCommonAPI {
+export class OpenFeatureAPI extends OpenFeatureCommonAPI implements GlobalApi {
   protected _hooks: Hook[] = [];
   protected _provider: Provider = NOOP_PROVIDER;
 
