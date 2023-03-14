@@ -1,6 +1,6 @@
 import { DefaultLogger, SafeLogger } from './logger';
 import { NOOP_TRANSACTION_CONTEXT_PROPAGATOR } from './no-op-transaction-context-propagator';
-import { EvaluationContext, Logger, TransactionContext, TransactionContextPropagator } from './types';
+import { EvaluationContext, Logger, ProviderMetadata, TransactionContext, TransactionContextPropagator } from './types';
 
 export abstract class OpenFeatureCommonAPI {
   protected _transactionContextPropagator: TransactionContextPropagator = NOOP_TRANSACTION_CONTEXT_PROPAGATOR;
@@ -14,6 +14,13 @@ export abstract class OpenFeatureCommonAPI {
     this._logger = new SafeLogger(logger);
     return this;
   }
+
+  /**
+   * Get metadata about registered provider.
+   *
+   * @returns {ProviderMetadata} Provider Metadata
+   */
+  abstract get providerMetadata(): ProviderMetadata;
 
   getContext(): EvaluationContext {
     return this._context;
