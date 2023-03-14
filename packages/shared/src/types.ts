@@ -10,12 +10,12 @@ export enum ProviderEvents {
    * The provider is in an error state.
    */
   Error = 'PROVIDER_ERROR',
-  
+
   /**
    * The flag configuration in the source-of-truth has changed.
    */
   ConfigurationChanged = 'PROVIDER_CONFIGURATION_CHANGED',
-  
+
   /**
    * The provider is transitioning to a state of unavailability.
    */
@@ -111,12 +111,12 @@ export const StandardResolutionReasons = {
    * The reason for the resolved value could not be determined.
    */
   UNKNOWN: 'UNKNOWN',
-  
+
   /**
    * The resolved value is static (no dynamic evaluation).
    */
   STATIC: 'STATIC',
-  
+
   /**
    * The resolved value was retrieved from cache.
    */

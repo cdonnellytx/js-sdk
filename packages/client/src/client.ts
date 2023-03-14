@@ -1,5 +1,3 @@
-import { OpenFeatureError } from '@openfeature/shared';
-import { SafeLogger } from '@openfeature/shared';
 import {
   ApiEvents,
   ClientMetadata,
@@ -11,8 +9,10 @@ import {
   HookContext,
   JsonValue,
   Logger,
+  OpenFeatureError,
   ProviderEvents,
   ResolutionDetails,
+  SafeLogger,
   StandardResolutionReasons
 } from '@openfeature/shared';
 import { OpenFeature } from './open-feature';

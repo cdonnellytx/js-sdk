@@ -13,7 +13,7 @@ import {
   ManageLogger,
   ManageTransactionContextPropagator,
   ProviderMetadata,
-  ResolutionDetails,
+  ResolutionDetails
 } from '@openfeature/shared';
 
 /**

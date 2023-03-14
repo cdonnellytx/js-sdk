@@ -7,7 +7,11 @@ import {
   Handler,
   HookContext,
   JsonValue,
-  Logger, OpenFeatureError, ResolutionDetails, SafeLogger, StandardResolutionReasons
+  Logger,
+  OpenFeatureError,
+  ResolutionDetails,
+  SafeLogger,
+  StandardResolutionReasons
 } from '@openfeature/shared';
 import { OpenFeature } from './open-feature';
 import { Client, FlagEvaluationOptions, Hook, Provider } from './types';

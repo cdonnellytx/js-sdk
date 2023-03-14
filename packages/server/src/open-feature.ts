@@ -1,7 +1,13 @@
-import { NOOP_PROVIDER } from './no-op-provider';
-import { Logger, OpenFeatureCommonAPI, SafeLogger } from '@openfeature/shared';
-import { EvaluationContext, FlagValue, ProviderMetadata } from '@openfeature/shared';
+import {
+  EvaluationContext,
+  FlagValue,
+  Logger,
+  OpenFeatureCommonAPI,
+  ProviderMetadata,
+  SafeLogger
+} from '@openfeature/shared';
 import { OpenFeatureClient } from './client';
+import { NOOP_PROVIDER } from './no-op-provider';
 import { Client, Hook, Provider } from './types';
 
 // use a symbol as a key for the global singleton
